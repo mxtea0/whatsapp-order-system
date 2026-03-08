@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Sipariş Sistemi - Yönetim Paneli</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 260px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 0;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            margin-top: 20px;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255,255,255,0.15);
+            border-left: 4px solid white;
+        }
+
+        .menu-item .icon {
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+        }
+
+        .top-bar {
+            background: white;
+            padding: 20px 30px;
+            margin: -30px -30px 30px -30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-bar h2 {
+            font-size: 24px;
+            color: #2d3748;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        /* Content Section */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Table */
+        .data-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f7fafc;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-danger {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .btn-icon {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        .btn-icon:hover {
+            transform: scale(1.2);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: #2d3748;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            padding: 12px 24px;
+            background: #e2e8f0;
+            color: #2d3748;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Login Screen */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .app-container {
+            display: none;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>🍽️ Admin Panel</h1>
+                <p>WhatsApp Sipariş Sistemi</p>
+            </div>
+            
+            <div class="error-message" id="loginError"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="loginUsername" required value="admin">
+                </div>
+                
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="loginPassword" required value="admin123">
+                </div>
+                
+                <button type="submit" class="btn-primary" style="width: 100%;">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container" id="appContainer">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>🍽️ Yönetim Paneli</h1>
+                <p>Sipariş Sistemi v1.0</p>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item active" onclick="showSection('dashboard')">
+                    <span class="icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="menu-item" onclick="showSection('restaurants')">
+                    <span class="icon">🏪</span>
+                    <span>Restoranlar</span>
+                </div>
+                <div class="menu-item" onclick="showSection('categories')">
+                    <span class="icon">📂</span>
+                    <span>Kategoriler</span>
+                </div>
+                <div class="menu-item" onclick="showSection('products')">
+                    <span class="icon">🍕</span>
+                    <span>Ürünler</span>
+                </div>
+                <div class="menu-item" onclick="showSection('orders')">
+                    <span class="icon">📦</span>
+                    <span>Siparişler</span>
+                </div>
+                <div class="menu-item" id="users-menu" onclick="showSection('users')">
+                    <span class="icon">👥</span>
+                    <span>Kullanıcılar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-bar">
+                <h2 id="pageTitle">Dashboard</h2>
+                <div class="user-info">
+                    <span id="userName">Admin</span>
+                    <button class="btn-logout" onclick="logout()">Çıkış</button>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="section-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🏪</div>
+                        <div class="stat-value" id="stat-restaurants">0</div>
+                        <div class="stat-label">Toplam Restoran</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-value" id="stat-orders">0</div>
+                        <div class="stat-label">Toplam Sipariş</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-value" id="stat-pending">0</div>
+                        <div class="stat-label">Bekleyen Sipariş</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="stat-revenue">0₺</div>
+                        <div class="stat-label">Bugünkü Gelir</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restaurants Section -->
+            <div class="content-section" id="section-restaurants">
+                <div class="section-header">
+                    <h3>Restoranlar</h3>
+                    <button class="btn-primary" onclick="showRestaurantModal()">+ Yeni Restoran</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ad</th>
+                                <th>Tip</th>
+                                <th>Telefon</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="restaurantsTable">
+                            <tr><td colspan="5" class="loading"><div class="spinner"></div>Yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div class="content-section" id="section-categories">
+                <div class="section-header">
+                    <h3>Kategoriler</h3>
+                    <button class="btn-primary" onclick="showCategoryModal()">+ Yeni Kategori</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kategori</th>
+                                <th>Restoran</th>
+                                <th>Emoji</th>
+                                <th>Sıra</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesTable">
+                            <tr><td colspan="6" class="loading"><div class="spinner"></div>Yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Products Section -->
+            <div class="content-section" id="section-products">
+                <div class="section-header">
+                    <h3>Ürünler</h3>
+                    <button class="btn-primary" onclick="showProductModal()">+ Yeni Ürün</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ürün</th>
+                                <th>Kategori</th>
+                                <th>Fiyat</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable">
+                            <tr><td colspan="5" class="loading"><div class="spinner"></div>Yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders Section -->
+            <div class="content-section" id="section-orders">
+                <div class="section-header">
+                    <h3>Siparişler</h3>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sipariş No</th>
+                                <th>Müşteri</th>
+                                <th>Restoran</th>
+                                <th>Tutar</th>
+                                <th>Durum</th>
+                                <th>Tarih</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr><td colspan="7" class="loading"><div class="spinner"></div>Yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div class="content-section" id="section-users">
+                <div class="section-header">
+                    <h3>Kullanıcılar</h3>
+                    <button class="btn-primary" onclick="showUserModal()">+ Yeni Kullanıcı</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı Adı</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Restoran</th>
+                                <th>Durum</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <tr><td colspan="6" class="loading"><div class="spinner"></div>Yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restaurant Modal -->
+    <div class="modal" id="restaurantModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="restaurantModalTitle">Yeni Restoran</h3>
+            </div>
+            <form id="restaurantForm">
+                <input type="hidden" id="restaurant-id">
+                <div class="form-group">
+                    <label>Restoran Adı *</label>
+                    <input type="text" id="restaurant-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea id="restaurant-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Tip *</label>
+                    <select id="restaurant-type" required>
+                        <option value="restaurant">Restoran</option>
+                        <option value="cafe">Cafe</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Emoji</label>
+                    <input type="text" id="restaurant-emoji" value="🍽️">
+                </div>
+                <div class="form-group">
+                    <label>Telefon *</label>
+                    <input type="tel" id="restaurant-phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Adres</label>
+                    <input type="text" id="restaurant-address">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeRestaurantModal()">İptal</button>
+                    <button type="submit" class="btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">Yeni Kategori</h3>
+            </div>
+            <form id="categoryForm">
+                <input type="hidden" id="category-id">
+                <div class="form-group">
+                    <label>Restoran *</label>
+                    <select id="category-restaurant" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Kategori Adı *</label>
+                    <input type="text" id="category-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea id="category-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Emoji</label>
+                    <input type="text" id="category-emoji" value="🍴">
+                </div>
+                <div class="form-group">
+                    <label>Sıra</label>
+                    <input type="number" id="category-order" value="1">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeCategoryModal()">İptal</button>
+                    <button type="submit" class="btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="productModalTitle">Yeni Ürün</h3>
+            </div>
+            <form id="productForm">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label>Kategori *</label>
+                    <select id="product-category" required></select>
+                </div>
+                <div class="form-group">
+                    <label>Ürün Adı *</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea id="product-description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Fiyat (₺) *</label>
+                    <input type="number" id="product-price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Sıra</label>
+                    <input type="number" id="product-order" value="1">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeProductModal()">İptal</button>
+                    <button type="submit" class="btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Yeni Kullanıcı</h3>
+            </div>
+            <form id="userForm">
+                <input type="hidden" id="user-id">
+                <div class="form-group">
+                    <label>Kullanıcı Adı *</label>
+                    <input type="text" id="user-username" required>
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="user-email" required>
+                </div>
+                <div class="form-group">
+                    <label>Şifre *</label>
+                    <input type="password" id="user-password" required>
+                    <small style="color: #718096;">Güncelleme yaparken boş bırakırsanız şifre değişmez</small>
+                </div>
+                <div class="form-group">
+                    <label>Rol *</label>
+                    <select id="user-role" required onchange="toggleRestaurantSelect()">
+                        <option value="manager">Manager (İşletme Yöneticisi)</option>
+                        <option value="admin">Admin (Süper Yönetici)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="restaurant-select-group">
+                    <label>Restoran *</label>
+                    <select id="user-restaurant"></select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeUserModal()">İptal</button>
+                    <button type="submit" class="btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build
+dist/
+build/
+
+# Environment Variables (HASSİS BİLGİLER!)
+.env
+.env.local
+.env.production
+.env.development
+
+# Uploads & User Files
+uploads/
+public/uploads/
+
+# Logs
+*.log
+logs/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+
+# Temporary Files
+*.tmp
+*.temp
+.cache/
+
+# Database (eğer local sqlite kullanılırsa)
+*.db
+*.sqlite
+*.sqlite3
